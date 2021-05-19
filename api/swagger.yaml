@@ -1,0 +1,1138 @@
+---
+swagger: "2.0"
+info:
+  description: "This is a beta e-MED server."
+  version: "1.0.0"
+  title: "e-Med"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "iasonlesgidis@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "virtserver.swaggerhub.com"
+basePath: "/aristotle1/kalo/1.0.0"
+tags:
+- name: "user"
+  description: "User configuration and login"
+- name: "pharmacy"
+  description: "Access to pharmacies information"
+- name: "hospital"
+  description: "Access to hospital information"
+- name: "clinic"
+  description: "Access to clinics information, and set apointment"
+- name: "radar"
+  description: "Access to for any virus outbreak near users"
+- name: "doctor"
+  description: "Set a doctors visit in your home adress"
+- name: "article"
+  description: "Search for articles"
+- name: "diet"
+  description: "Search for diets"
+- name: "diagnosis"
+  description: "Get you diagnosis, by symptoms"
+- name: "search"
+  description: "search in the apps database"
+schemes:
+- "https"
+- "http"
+paths:
+  /user:
+    post:
+      tags:
+      - "user"
+      summary: "Create user"
+      description: "This can only be done by the logged in user."
+      operationId: "createUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "User"
+  /user/login:
+    get:
+      tags:
+      - "user"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "The user name for login"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "The password for login in clear text"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        "400":
+          description: "Invalid username/password supplied"
+      x-swagger-router-controller: "User"
+  /user/logout:
+    get:
+      tags:
+      - "user"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "logs out user"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        "400":
+          description: "Invalid username/password supplied"
+      x-swagger-router-controller: "User"
+  /user/pharmacy/{PharmacyCity}:
+    get:
+      tags:
+      - "pharmacy"
+      summary: "Search for pharmacies near you"
+      description: "This can only be done by the logged in user.Return pharmacies\
+        \ in chosen city"
+      operationId: "Search_pharmacies"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "PharmacyCity"
+        in: "path"
+        description: "The location where the you search for on call pharmacies"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "Edessa"
+          enum:
+          - "Athens"
+          - "Edessa"
+          - "Kozani"
+          - "Thessaloniki"
+          - "Ptolemaida"
+        collectionFormat: "csv"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Pharmacy"
+        "400":
+          description: "No pharmacies where detected"
+      x-swagger-router-controller: "Pharmacy"
+  /user/hospital/{HospitalCity}:
+    get:
+      tags:
+      - "hospital"
+      summary: "Search for hospitals near you"
+      description: "This can only be done by the logged in user.Returns hospital in\
+        \ chosen city"
+      operationId: "Search_hospitals"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "HospitalCity"
+        in: "path"
+        description: "Search for On Call Hospitals in that city"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          enum:
+          - "Athens"
+          - "Edessa"
+          - "Kozani"
+          - "Thessaloniki"
+          - "Ptolemaida"
+        collectionFormat: "csv"
+        default: "Edessa"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Hospital"
+        "400":
+          description: "No hospital where detected"
+      x-swagger-router-controller: "Hospital"
+  /user/clinic/{ClinicCity}:
+    get:
+      tags:
+      - "clinic"
+      summary: "Search for clinics near you"
+      description: "This can only be done by the logged in user.Returns clinics in\
+        \ chosen city"
+      operationId: "Search_clinic"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "ClinicCity"
+        in: "path"
+        description: "search for clinics in that city"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          enum:
+          - "Athens"
+          - "Edessa"
+          - "Kozani"
+          - "Thessaloniki"
+          - "Ptolemaida"
+        collectionFormat: "csv"
+        default: "Edessa"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Clinic"
+        "400":
+          description: "No clinic where detected"
+      x-swagger-router-controller: "Clinic"
+  /user/clinic/clinicName/{ClinicName}/SetApointment:
+    post:
+      tags:
+      - "clinic"
+      summary: "Set schedule in clinic"
+      description: "This can only be done by the logged in user.Posts a clinic appointment\
+        \ in database"
+      operationId: "Set_clinic_apointment"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "ClinicName"
+        in: "path"
+        description: "Status values that need to be considered for filter"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          enum:
+          - "Agios Loukas"
+          - "Papanikolaou"
+          - "Agios dimitrios"
+          - "Geniko Balkaniko"
+        collectionFormat: "csv"
+        default: "Agios Loukas"
+      - name: "Date"
+        in: "query"
+        description: "Set day for apointment"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          enum:
+          - "Monday 25/05/2020"
+          - "Tuesday 26/05/2020"
+          - "Wednesday 27/05/2020"
+          - "Thursday 28/05/2020"
+          - "Friday 29/05/2020"
+        collectionFormat: "multi"
+        default: "Friday 29/05/2020"
+      - name: "Time"
+        in: "query"
+        description: "Set time at apointment"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          enum:
+          - "10:00 AM"
+          - "10:30 AM"
+          - "11:00 AM"
+          - "11:30 AM"
+          - "12:00 AM"
+          - "12:30 AM"
+          - "13:00 PM"
+          - "13:30 PM"
+          - ""
+          - "18:00 PM"
+          - "18:30 PM"
+          - "19:00 PM"
+          - "19:30 PM"
+        collectionFormat: "multi"
+        default: "available"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ClinicAppointments"
+        "400":
+          description: "No hospital where detected"
+      x-swagger-router-controller: "Clinic"
+  /user/category/{category}/subcategory/{subcategory}/productID/{ProductID}:
+    get:
+      tags:
+      - "pharmacy"
+      summary: "search for pharmacy products"
+      description: "This can only be done by the logged in user.Returns  products\
+        \ with related Product Name"
+      operationId: "Search_Products"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "category"
+        in: "path"
+        description: "The category of the product you are interested"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "Care"
+          enum:
+          - "vitamins"
+          - "Sterilization products"
+          - "Prosthetics"
+          - "Care"
+        collectionFormat: "csv"
+      - name: "subcategory"
+        in: "path"
+        description: "The subcategory of the product you are interested"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "Sunscreen"
+          enum:
+          - "Fase Care"
+          - "Body Care"
+          - "Sunscreen"
+          - "Sunbaithing Oils"
+        collectionFormat: "csv"
+      - name: "ProductID"
+        in: "path"
+        description: "The location where the you search for on call pharmacies"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "Nivea: Creme Care"
+          enum:
+          - "Nivea: Creme Care"
+          - "Vichy Slow Age 50ml"
+          - "Nuxe Nuxellence Eye Contour 15ml"
+          - "Apivita Bee Radiant SPF30 40ml"
+          - "Vichy Aqualia Thermal Night 75ml"
+        collectionFormat: "csv"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Product"
+        "400":
+          description: "Invalid product"
+        "404":
+          description: "Product not found"
+      x-swagger-router-controller: "Pharmacy"
+  /user/diet/{DietId}:
+    get:
+      tags:
+      - "diet"
+      summary: "Read a diet"
+      description: "This can only be done by the logged in user.Returns diet"
+      operationId: "Read_diets"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "DietId"
+        in: "path"
+        description: "Status values that need to be considered for filter"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          enum:
+          - "Diet for a healthy life"
+          - "Diet for recuping from a virus"
+          - "Diet for athletes"
+          - "vitamin Diet"
+          - "Healthy Diet, for loosing weight"
+        collectionFormat: "csv"
+        default: "vitamin Diet"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Diet"
+        "400":
+          description: "Invalid diet"
+        "404":
+          description: "Diet not found"
+      x-swagger-router-controller: "Diet"
+  /user/article/{ArticleId}:
+    get:
+      tags:
+      - "article"
+      summary: "search for articles"
+      description: "This can only be done by the logged in user.Returns a article"
+      operationId: "Search_article"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "ArticleId"
+        in: "path"
+        description: "Choose the articles you are interested in:"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "Breaking News"
+          enum:
+          - "Breaking News"
+          - "How can i fight aging"
+          - "Optical failure, Why?"
+          - "How to fight long term desease"
+        collectionFormat: "csv"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Article"
+        "400":
+          description: "Invalid article "
+        "404":
+          description: "Article not found"
+      x-swagger-router-controller: "Article"
+  /user/diagnosis/Symptoms:
+    get:
+      tags:
+      - "diagnosis"
+      summary: "diagnosis menu"
+      description: "This can only be done by the logged in user.Returns a Diagnosis"
+      operationId: "Search_diagnosis"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "SymptomName"
+        in: "query"
+        description: "Choose your symptoms"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "headache"
+          enum:
+          - "Caugh"
+          - "Feever"
+          - "Stomach pain"
+          - "headache"
+        collectionFormat: "multi"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Diagnosis"
+        "400":
+          description: "Invalid symptoms "
+        "404":
+          description: "Diagnosis not found"
+      x-swagger-router-controller: "Diagnosis"
+  /user/doctors/doctorCity/{doctorcity}:
+    get:
+      tags:
+      - "doctor"
+      summary: "Doctors menu"
+      description: "Returns doctors in given city"
+      operationId: "find doctors"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "doctorcity"
+        in: "path"
+        description: "Choose city"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "Edessa"
+          enum:
+          - "Athens"
+          - "Thessaloniki"
+          - "Edessa"
+          - "Ptolemaida"
+        collectionFormat: "csv"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Doctor"
+        "400":
+          description: "Invalid Doctor "
+        "404":
+          description: "Doctor not found"
+      x-swagger-router-controller: "Doctor"
+  /user/doctor/{doctorCity}/setappointment/doctorId/{doctorId}:
+    post:
+      tags:
+      - "doctor"
+      summary: "Doctors menu"
+      description: "Posts a doctor appointment in given city"
+      operationId: "book appointment"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "doctorId"
+        in: "path"
+        required: true
+        type: "number"
+      - name: "doctorCity"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "Available Days"
+        in: "query"
+        required: true
+        type: "array"
+        items: {}
+        collectionFormat: "multi"
+        default: "available"
+      - name: "Available Time"
+        in: "query"
+        description: " "
+        required: true
+        type: "array"
+        items: {}
+        collectionFormat: "multi"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Doctor"
+        "400":
+          description: "Invalid Doctor "
+        "404":
+          description: "Doctor not found"
+      x-swagger-router-controller: "Doctor"
+  /user/radar/Location:
+    get:
+      tags:
+      - "radar"
+      summary: "Search for incidents near you"
+      description: "This can only be done by the logged in user, who has the IsVulnerable\
+        \ value equal to True.Returns a message"
+      operationId: "Search_with_radar"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "Longtitude"
+        in: "query"
+        description: "Your longtitude"
+        required: true
+        type: "number"
+      - name: "Latitude"
+        in: "query"
+        description: "Your latitude"
+        required: true
+        type: "number"
+      responses:
+        "200":
+          description: "Radar results:"
+          schema:
+            $ref: "#/definitions/Radar"
+        "400":
+          description: "Ooops... we can't find you! Open your gps location"
+        "404":
+          description: "Can't connect to server"
+      x-swagger-router-controller: "Radar"
+  /user/search/{SearchWord}:
+    get:
+      tags:
+      - "search"
+      summary: "Search in the database with a specific word.Return  search-related\
+        \ objects"
+      description: "search"
+      operationId: "Search_with_text"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "SearchWord"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "searchText"
+        in: "query"
+        description: "Search"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Search results:"
+          schema:
+            $ref: "#/definitions/search"
+        "400":
+          description: "Ooops... we can't find you! Open your gps location"
+        "404":
+          description: "Can't connect to server"
+      x-swagger-router-controller: "Search"
+definitions:
+  User:
+    type: "object"
+    properties:
+      userID:
+        type: "number"
+        format: "AMKA"
+        example: 15209444442
+      username:
+        type: "string"
+        example: "Superman23"
+      password:
+        type: "string"
+        example: "password123"
+      email:
+        type: "string"
+        example: "petridispa@ece.auth.gr"
+      IsVulnerable:
+        type: "boolean"
+        example: false
+      Longitude:
+        type: "number"
+        example: 43.24000000000000198951966012828052043914794921875
+      Latitude:
+        type: "number"
+        example: 34.53999999999999914734871708787977695465087890625
+      UserCity:
+        type: "string"
+        example: "Edessa"
+    xml:
+      name: "User"
+    example:
+      password: "password123"
+      IsVulnerable: false
+      UserCity: "Edessa"
+      Latitude: 34.53999999999999914734871708787977695465087890625
+      userID: 15209444442
+      Longitude: 43.24000000000000198951966012828052043914794921875
+      email: "petridispa@ece.auth.gr"
+      username: "Superman23"
+  Radar:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        example: "You are safe"
+    example:
+      message: "You are safe"
+  Pharmacy:
+    type: "object"
+    properties:
+      PharmacyAdress:
+        type: "string"
+        example: "lampraki 12"
+      PharmacyName:
+        type: "string"
+        example: "farmakopoulos"
+      PharmacyPhoneNumber:
+        type: "string"
+        example: "2381023810"
+      Longitude:
+        type: "number"
+        example: 14.449999999999999289457264239899814128875732421875
+      Latitude:
+        type: "number"
+        example: 12.269999999999999573674358543939888477325439453125
+      PharmacyCity:
+        type: "string"
+        example: "Athens"
+      Schedule:
+        type: "string"
+        example: "daily"
+      IsOpen:
+        type: "boolean"
+        example: false
+      PharmacyID:
+        type: "integer"
+        format: "pharmacyID"
+        example: 1212
+    xml:
+      name: "Pharmacy"
+    example:
+      PharmacyID: 1212
+      PharmacyCity: "Athens"
+      PharmacyAdress: "lampraki 12"
+      Schedule: "daily"
+      Latitude: 12.269999999999999573674358543939888477325439453125
+      PharmacyName: "farmakopoulos"
+      Longitude: 14.449999999999999289457264239899814128875732421875
+      PharmacyPhoneNumber: "2381023810"
+      IsOpen: false
+  Hospital:
+    type: "object"
+    properties:
+      HospitalAdress:
+        type: "string"
+        example: "lampraki 12"
+      HospitalName:
+        type: "string"
+        example: "Ippokratio"
+      HospitalPhoneNumber:
+        type: "string"
+        example: "2381023810"
+      Longitude:
+        type: "number"
+        example: 32.53999999999999914734871708787977695465087890625
+      Latitude:
+        type: "number"
+        example: 42.32000000000000028421709430404007434844970703125
+      HospitalCity:
+        type: "string"
+        example: "Thessaloniki"
+      OpenOnCallSchedule:
+        type: "string"
+        example: "daily"
+      IsOpen:
+        type: "boolean"
+        example: false
+      HospitalID:
+        type: "integer"
+        format: "HospitalID"
+        example: 4321
+    xml:
+      name: "Hospital"
+    example:
+      HospitalCity: "Thessaloniki"
+      HospitalAdress: "lampraki 12"
+      HospitalPhoneNumber: "2381023810"
+      OpenOnCallSchedule: "daily"
+      HospitalID: 4321
+      Latitude: 42.32000000000000028421709430404007434844970703125
+      HospitalName: "Ippokratio"
+      Longitude: 32.53999999999999914734871708787977695465087890625
+      IsOpen: false
+  Clinic:
+    type: "object"
+    properties:
+      ClinicID:
+        type: "integer"
+        format: "ClinicID"
+        example: 5555
+      ClinicAdress:
+        type: "string"
+        example: "Thessaloniki"
+      ClinicName:
+        type: "string"
+        example: "agios dimitrios"
+      Longitude:
+        type: "number"
+        example: 23.339999999999999857891452847979962825775146484375
+      Latitude:
+        type: "number"
+        example: 35.32000000000000028421709430404007434844970703125
+      ClinicCity:
+        type: "string"
+        example: "Thessaloniki"
+      Schedule:
+        type: "string"
+        example: "daily"
+    xml:
+      name: "Clinic"
+    example:
+      ClinicCity: "Thessaloniki"
+      ClinicName: "agios dimitrios"
+      Schedule: "daily"
+      ClinicID: 5555
+      ClinicAdress: "Thessaloniki"
+      Latitude: 35.32000000000000028421709430404007434844970703125
+      Longitude: 23.339999999999999857891452847979962825775146484375
+  ClinicAppointments:
+    type: "object"
+    properties:
+      PatientName:
+        type: "string"
+        example: "Mhxalhs mhxailidhs"
+      DateAndTime:
+        type: "string"
+        example: "28/5/2020 13:30"
+      DoctorsName:
+        type: "string"
+        example: "George Stephnaopoulos"
+    xml:
+      name: "Clinic"
+    example:
+      DoctorsName: "George Stephnaopoulos"
+      DateAndTime: "28/5/2020 13:30"
+      PatientName: "Mhxalhs mhxailidhs"
+  Doctor:
+    type: "object"
+    properties:
+      DoctorID:
+        type: "integer"
+        format: "DoctorID"
+        example: 3233
+      DoctorAdress:
+        type: "string"
+        example: "nikomidias 70"
+      DoctorName:
+        type: "string"
+        example: "Dimitris Dimitropoulos"
+      DoctorDegree:
+        type: "string"
+        example: "university of sofia"
+      DoctorSex:
+        type: "boolean"
+        example: true
+      DoctorPhoneNumber:
+        type: "string"
+        example: "69999999"
+      Longitude:
+        type: "number"
+        example: 13.42999999999999971578290569595992565155029296875
+      Latitude:
+        type: "number"
+        example: 32.340000000000003410605131648480892181396484375
+      DoctorCity:
+        type: "string"
+        example: "Thessaloniki"
+      DoctorSchedule:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            PatientName:
+              type: "string"
+              example: "Mixail Mixailidis"
+            DateAndTime:
+              type: "string"
+              example: "28/5/2020  13:30"
+      DoctorDescription:
+        type: "string"
+        example: "pathologist"
+    xml:
+      name: "Doctor"
+    example:
+      DoctorID: 3233
+      DoctorName: "Dimitris Dimitropoulos"
+      DoctorAdress: "nikomidias 70"
+      DoctorPhoneNumber: "69999999"
+      DoctorSchedule:
+      - "{}"
+      - "{}"
+      Latitude: 32.340000000000003410605131648480892181396484375
+      DoctorSex: true
+      Longitude: 13.42999999999999971578290569595992565155029296875
+      DoctorDegree: "university of sofia"
+      DoctorCity: "Thessaloniki"
+      DoctorDescription: "pathologist"
+  Article:
+    type: "object"
+    properties:
+      ArticleID:
+        type: "integer"
+        format: "ArticleID"
+        example: 2112
+      ArticleTitle:
+        type: "string"
+        example: "Breaking News"
+      ArticleSubtitle:
+        type: "string"
+        example: "the lastest news"
+      ArticleContent:
+        type: "string"
+        example: "Today, there was a breakthrough..."
+    xml:
+      name: "Article"
+    example:
+      ArticleContent: "Today, there was a breakthrough..."
+      ArticleSubtitle: "the lastest news"
+      ArticleTitle: "Breaking News"
+      ArticleID: 2112
+  Diet:
+    type: "object"
+    properties:
+      DietID:
+        type: "integer"
+        format: "DietID"
+        example: 12124
+      DietTitle:
+        type: "string"
+        example: "Diet for a healthy life"
+      DietContent:
+        type: "string"
+        example: "To see if you are ready,,,"
+    xml:
+      name: "Diet"
+    example:
+      DietContent: "To see if you are ready,,,"
+      DietTitle: "Diet for a healthy life"
+      DietID: 12124
+  Diagnosis:
+    type: "object"
+    properties:
+      DiagnosisID:
+        type: "integer"
+        format: "DiagnosisID"
+        example: 4212
+      DiagnosisTitle:
+        type: "string"
+        example: "a"
+      DiagnosisSymptoms:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            SymptomID:
+              type: "integer"
+              example: 2421
+            SymptomExist:
+              type: "boolean"
+              format: "SymptomBoolean"
+              example: true
+            SymptomName:
+              type: "string"
+              example: "Feever"
+            ExtraSymptoms:
+              type: "string"
+              example: ""
+    xml:
+      name: "Diagnosis"
+    example:
+      DiagnosisSymptoms:
+      - "{}"
+      - "{}"
+      DiagnosisTitle: "a"
+      DiagnosisID: 4212
+  Product:
+    type: "object"
+    properties:
+      ProductID:
+        type: "integer"
+        example: 3232
+      Name:
+        type: "string"
+        example: "Nivea, creme Care"
+      Category:
+        $ref: "#/definitions/Category"
+      OnlinePharmacyProduct:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            ProductURL:
+              type: "string"
+              example: "http://www.merck.de"
+            ProductID:
+              type: "integer"
+              example: 3232
+            ProductPrice:
+              type: "number"
+              example: "23€"
+            ProductTransportFee:
+              type: "number"
+              example: 1
+            PayOnDelivery:
+              type: "boolean"
+              example: true
+      SitesThatHaveTheProduct:
+        type: "string"
+    xml:
+      name: "Product"
+    example:
+      SitesThatHaveTheProduct: "SitesThatHaveTheProduct"
+      Category:
+        CategoryName: "Creme"
+        ListSubCategory:
+        - SubCategoryName: "prosopou"
+        - SubCategoryName: "prosopou"
+      OnlinePharmacyProduct:
+      - "{}"
+      - "{}"
+      ProductID: 3232
+      Name: "Nivea, creme Care"
+  Category:
+    type: "object"
+    properties:
+      CategoryName:
+        type: "string"
+        example: "Creme"
+      ListSubCategory:
+        type: "array"
+        items:
+          $ref: "#/definitions/SubCategory"
+    example:
+      CategoryName: "Creme"
+      ListSubCategory:
+      - SubCategoryName: "prosopou"
+      - SubCategoryName: "prosopou"
+  SubCategory:
+    type: "object"
+    properties:
+      SubCategoryName:
+        type: "string"
+        example: "prosopou"
+    example:
+      SubCategoryName: "prosopou"
+  search:
+    type: "object"
+    properties:
+      SearchText:
+        type: "string"
+        example: "News"
+      SearchPharmacies:
+        type: "array"
+        items:
+          $ref: "#/definitions/Pharmacy"
+      SearchPharmacyProducts:
+        type: "array"
+        items:
+          $ref: "#/definitions/Product"
+      SearchDiagnosis:
+        type: "array"
+        items:
+          $ref: "#/definitions/Diagnosis"
+      SearchClinic:
+        type: "array"
+        items:
+          $ref: "#/definitions/Clinic"
+      SearchHospitals:
+        type: "array"
+        items:
+          $ref: "#/definitions/Hospital"
+      SearchArticles:
+        type: "array"
+        items:
+          $ref: "#/definitions/Article"
+      SearchDiet:
+        type: "array"
+        items:
+          $ref: "#/definitions/Diet"
+    example:
+      SearchPharmacies:
+      - PharmacyID: 1212
+        PharmacyCity: "Athens"
+        PharmacyAdress: "lampraki 12"
+        Schedule: "daily"
+        Latitude: 12.269999999999999573674358543939888477325439453125
+        PharmacyName: "farmakopoulos"
+        Longitude: 14.449999999999999289457264239899814128875732421875
+        PharmacyPhoneNumber: "2381023810"
+        IsOpen: false
+      - PharmacyID: 1212
+        PharmacyCity: "Athens"
+        PharmacyAdress: "lampraki 12"
+        Schedule: "daily"
+        Latitude: 12.269999999999999573674358543939888477325439453125
+        PharmacyName: "farmakopoulos"
+        Longitude: 14.449999999999999289457264239899814128875732421875
+        PharmacyPhoneNumber: "2381023810"
+        IsOpen: false
+      SearchPharmacyProducts:
+      - SitesThatHaveTheProduct: "SitesThatHaveTheProduct"
+        Category:
+          CategoryName: "Creme"
+          ListSubCategory:
+          - SubCategoryName: "prosopou"
+          - SubCategoryName: "prosopou"
+        OnlinePharmacyProduct:
+        - "{}"
+        - "{}"
+        ProductID: 3232
+        Name: "Nivea, creme Care"
+      - SitesThatHaveTheProduct: "SitesThatHaveTheProduct"
+        Category:
+          CategoryName: "Creme"
+          ListSubCategory:
+          - SubCategoryName: "prosopou"
+          - SubCategoryName: "prosopou"
+        OnlinePharmacyProduct:
+        - "{}"
+        - "{}"
+        ProductID: 3232
+        Name: "Nivea, creme Care"
+      SearchClinic:
+      - ClinicCity: "Thessaloniki"
+        ClinicName: "agios dimitrios"
+        Schedule: "daily"
+        ClinicID: 5555
+        ClinicAdress: "Thessaloniki"
+        Latitude: 35.32000000000000028421709430404007434844970703125
+        Longitude: 23.339999999999999857891452847979962825775146484375
+      - ClinicCity: "Thessaloniki"
+        ClinicName: "agios dimitrios"
+        Schedule: "daily"
+        ClinicID: 5555
+        ClinicAdress: "Thessaloniki"
+        Latitude: 35.32000000000000028421709430404007434844970703125
+        Longitude: 23.339999999999999857891452847979962825775146484375
+      SearchArticles:
+      - ArticleContent: "Today, there was a breakthrough..."
+        ArticleSubtitle: "the lastest news"
+        ArticleTitle: "Breaking News"
+        ArticleID: 2112
+      - ArticleContent: "Today, there was a breakthrough..."
+        ArticleSubtitle: "the lastest news"
+        ArticleTitle: "Breaking News"
+        ArticleID: 2112
+      SearchHospitals:
+      - HospitalCity: "Thessaloniki"
+        HospitalAdress: "lampraki 12"
+        HospitalPhoneNumber: "2381023810"
+        OpenOnCallSchedule: "daily"
+        HospitalID: 4321
+        Latitude: 42.32000000000000028421709430404007434844970703125
+        HospitalName: "Ippokratio"
+        Longitude: 32.53999999999999914734871708787977695465087890625
+        IsOpen: false
+      - HospitalCity: "Thessaloniki"
+        HospitalAdress: "lampraki 12"
+        HospitalPhoneNumber: "2381023810"
+        OpenOnCallSchedule: "daily"
+        HospitalID: 4321
+        Latitude: 42.32000000000000028421709430404007434844970703125
+        HospitalName: "Ippokratio"
+        Longitude: 32.53999999999999914734871708787977695465087890625
+        IsOpen: false
+      SearchText: "News"
+      SearchDiet:
+      - DietContent: "To see if you are ready,,,"
+        DietTitle: "Diet for a healthy life"
+        DietID: 12124
+      - DietContent: "To see if you are ready,,,"
+        DietTitle: "Diet for a healthy life"
+        DietID: 12124
+      SearchDiagnosis:
+      - DiagnosisSymptoms:
+        - "{}"
+        - "{}"
+        DiagnosisTitle: "a"
+        DiagnosisID: 4212
+      - DiagnosisSymptoms:
+        - "{}"
+        - "{}"
+        DiagnosisTitle: "a"
+        DiagnosisID: 4212
